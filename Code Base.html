@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Base Terminal</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #terminal {
+            width: 80%;
+            height: 80%;
+            border: 2px solid #00FF00;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            background-color: #1E1E1E;
+        }
+
+        #output {
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        #input-line {
+            display: flex;
+        }
+
+        .prompt {
+            margin-right: 5px;
+        }
+
+        #input {
+            background: #1E1E1E;
+            border: none;
+            color: #00FF00;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal">
+        <div id="output"></div>
+        <div id="input-line">
+            <span class="prompt">C:\></span>
+            <input type="text" id="input" autofocus>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputField = document.getElementById("input");
+            const outputDiv = document.getElementById("output");
+            const terminalDiv = document.getElementById("terminal");
+
+            inputField.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    const command = inputField.value;
+                    executeCommand(command);
+                    inputField.value = "";
+                }
+            });
+
+            function executeCommand(command) {
+                const newLine = document.createElement("div");
+                newLine.textContent = `C:\\> ${command}`;
+                outputDiv.appendChild(newLine);
+
+                const response = document.createElement("div");
+                response.textContent = processCommand(command);
+                outputDiv.appendChild(response);
+
+                outputDiv.scrollTop = outputDiv.scrollHeight;
+            }
+
+            function processCommand(command) {
+                const [cmd, ...args] = command.split(" ");
+                switch (cmd.toLowerCase()) {
+                    case "help":
+                        return `Available commands:
+- help: List available commands
+- about: Display information about this terminal
+- date: Show the current date and time
+- clear: Clear the terminal screen
+- echo [text]: Repeat the entered text
+- calc [operation]: Perform a basic arithmetic operation
+- random: Generate a random number between 1 and 100
+- reverse [text]: Reverse the entered text
+- build [code]: Run the entered text as JavaScript. Note: this command can be dangerous! Don't put any code you don't trust!
+- style [css]: Apply the entered CSS to the terminal interface. Note: this can be a setting command, do not use if you don't know what you're doing!
+- weather [city]: Open weather.com for the specified city
+- search [query]: Perform a web search using the entered query
+- wiki [query]: Search Wikipedia for the entered query
+- youtube [query]: Search YouTube for the entered query
+- translate [text] [language]: Translate the given text to the specified language
+- ip [domain]: Open a WHOIS lookup website for the entered domain
+- ping [domain]: Open a ping test website for the specified domain
+- uptime: Open a website to check system uptime
+- exit: Close the terminal window`;
+                    case "about":
+                        return "Code Base Terminal v1.4 - A DOS-like terminal emulator.";
+                    case "date":
+                        return new Date().toString();
+                    case "clear":
+                        outputDiv.innerHTML = "";
+                        return "";
+                    case "echo":
+                        return args.join(" ");
+                    case "calc":
+                        return calculate(args.join(" "));
+                    case "random":
+                        return Math.floor(Math.random() * 100) + 1;
+                    case "reverse":
+                        return args.join(" ").split("").reverse().join("");
+                    case "build":
+                        return runJavaScript(args.join(" "));
+                    case "style":
+                        applyCustomStyle(args.join(" "));
+                        return "Custom style applied.";
+                    case "weather":
+                        return openWebsite("https://weather.com");
+                    case "search":
+                        return openWebsite(`https://www.google.com/search?q=${encodeURIComponent(args.join(" "))}`);
+                    case "wiki":
+                        return openWebsite(`https://en.wikipedia.org/wiki/${encodeURIComponent(args.join("_"))}`);
+                    case "youtube":
+                        return openWebsite(`https://www.youtube.com/results?search_query=${encodeURIComponent(args.join(" "))}`);
+                    case "translate":
+                        return openWebsite("https://translate.google.com");
+                    case "ip":
+                        return openWebsite("https://whois.domaintools.com/");
+                    case "ping":
+                        return openWebsite("https://ping.eu/");
+                    case "uptime":
+                        return openWebsite("https://uptime.com/");
+                    case "exit":
+                        window.close(); // Close the terminal window
+                    default:
+                        return `'${command}' is not recognized as an internal or external command, operable program or batch file.`;
+                }
+            }
+
+            function calculate(expression) {
+                try {
+                    const result = eval(expression);
+                    return `Result: ${result}`;
+                } catch (error) {
+                    return "Error: Invalid calculation.";
+                }
+            }
+
+            function runJavaScript(code) {
+                try {
+                    const result = eval(code);
+                    return result !== undefined ? `Result: ${result}` : "Code executed successfully.";
+                } catch (error) {
+                    return `Error: ${error.message}`;
+                }
+            }
+
+            function openWebsite(url) {
+                window.open(url, '_blank');
+                return "Opening website...";
+            }
+
+            function applyCustomStyle(css) {
+                const styleTag = document.createElement("style");
+                styleTag.textContent = css;
+                terminalDiv.appendChild(styleTag);
+            }
+        });
+    </script>
+</body>
+</html>
